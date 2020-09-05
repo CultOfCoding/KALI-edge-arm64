@@ -26,6 +26,8 @@ cd /root/unkn0wn
 chmod +x usr/bin/*
 mv usr/bin/spinner /usr/bin/
 mv usr/bin/wait-online /usr/bin/
+mv usr/bin/fanfix.sh /usr/bin/
+fanfix.sh &
 
 #@@
 wait-online

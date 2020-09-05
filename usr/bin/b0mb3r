@@ -1,0 +1,10 @@
+#!/bin/bash
+
+{
+sudo -u x xhost +
+xhost +
+}&>/dev/null
+
+screen -m -d sudo -u x http_proxy=http://127.0.0.1:5566 b0mb3r --port 53101
+screen -m -d sudo -u x http_proxy=http://127.0.0.1:5566 b0mb3r --port 53102
+screen -m -d sudo -u x http_proxy=http://127.0.0.1:5566 b0mb3r --port 53103

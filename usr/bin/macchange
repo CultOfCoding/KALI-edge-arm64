@@ -1,0 +1,7 @@
+#!/bin/bash
+
+sudo -u root ip link set wlan0 down
+sleep 1
+sudo -u root macchanger -A wlan0
+sudo -u root  ip link set wlan0 up
+

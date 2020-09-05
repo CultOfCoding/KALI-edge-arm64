@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+## simple example with sleep
+# $(sleep 5; exit 0) &
+# spinner $! 'succeeded spinner'
+# $(sleep 5; exit 1) &
+# spinner $! 'failed spinner'
+
+spinner() {
+    local proc="$1"
+    local message="$2"
+    local animation=${3:-"dots1"} 
+    local default="⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏"
+    local delay="0.1"
+
+    case $animation in
+        dots1) local frames=$default;;
+        dots2) local frames="⣾ ⣽ ⣻ ⢿ ⡿ ⣟ ⣯ ⣷";;
+        dots3) local frames="⠋ ⠙ ⠚ ⠞ ⠖ ⠦ ⠴ ⠲ ⠳ ⠓";;
+        dots4) local frames="⠄ ⠆ ⠇ ⠋ ⠙ ⠸ ⠰ ⠠ ⠰ ⠸ ⠙ ⠋ ⠇ ⠆";;
+        dots5) local frames="⠋ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋";;
+        dots6) local frames="⠁ ⠉ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠴ ⠲ ⠒ ⠂ ⠂ ⠒ ⠚ ⠙ ⠉ ⠁";;
+        dots7) local frames="⠈ ⠉ ⠋ ⠓ ⠒ ⠐ ⠐ ⠒ ⠖ ⠦ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋ ⠉ ⠈";;
+        dots8) local frames="⠁ ⠁ ⠉ ⠙ ⠚ ⠒ ⠂ ⠂ ⠒ ⠲ ⠴ ⠤ ⠄ ⠄ ⠤ ⠠ ⠠ ⠤ ⠦ ⠖ ⠒ ⠐ ⠐ ⠒ ⠓ ⠋ ⠉ ⠈ ⠈";;
+        dots9) local frames="⢹ ⢺ ⢼ ⣸ ⣇ ⡧ ⡗ ⡏";;
+        dots10) local frames="⢄ ⢂ ⢁ ⡁ ⡈ ⡐ ⡠";;
+        dots11) local frames="⠁ ⠂ ⠄ ⡀ ⢀ ⠠ ⠐ ⠈";;
+        dots12) local frames="⢀⠀ ⡀⠀ ⠄⠀ ⢂⠀ ⡂⠀ ⠅⠀ ⢃⠀ ⡃⠀ ⠍⠀ ⢋⠀ ⡋⠀ ⠍⠁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⢈⠩ ⡀⢙ ⠄⡙ ⢂⠩ ⡂⢘ ⠅⡘ ⢃⠨ ⡃⢐ ⠍⡐ ⢋⠠ ⡋⢀ ⠍⡁ ⢋⠁ ⡋⠁ ⠍⠉ ⠋⠉ ⠋⠉ ⠉⠙ ⠉⠙ ⠉⠩ ⠈⢙ ⠈⡙ ⠈⠩ ⠀⢙ ⠀⡙ ⠀⠩ ⠀⢘ ⠀⡘ ⠀⠨ ⠀⢐ ⠀⡐ ⠀⠠ ⠀⢀ ⠀⡀";;
+        *) local frames=$default;;
+    esac
+    
+    tput civis  # hide cursor
+
+    while kill -0 ${proc} 2>/dev/null; do
+        for frame in $frames; do
+            printf "\033[1;34m\033[s\033[u $frame \033[0m%s\r" "$message"
+            sleep $delay
+        done
+    done
+
+    wait $1
+    
+    local code=$?
+    [[ $code -ne 0 ]] && local status="\033[38;5;124m⨉\033[0m" || local status="\033[38;5;28m✓\033[0m"
+
+    printf '\033[s\033[u%*s\033[u\033[0m\r' $((${#message}+3)) " " # return to normal
+    printf " $status $message\n" # TODO: add default message and option to use on one-line only
+    tput cnorm  # restore cursor
+    
+    return $code
+}
+
+#sleep 0.5
+#while ! timeout 0.2  ping -c 1 -n 8.8.8.8 &> /dev/null; do sleep 1; done &
+#printf '    Ожидаю подключения к сети... ждите :)' ; spinner $!

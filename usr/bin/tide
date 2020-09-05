@@ -1,0 +1,18 @@
+#!/bin/bash
+
+sudo -u root killall osfooler-ng
+
+sudo -u root iptables -F
+sudo -u root iptables -t nat-F
+sudo -u root iptables -t mangle -F
+sudo -u root iptables -t filter -F
+
+sudo -u root iptables -X
+sudo -u root iptables -t nat -X
+sudo -u root iptables -t mangle -X
+sudo -u root iptables -t filter -X
+
+sudo -u root iptables-save
+
+cp /opt/dnscrypt-proxy-quad9.toml /opt/dnscrypt-proxy/dnscrypt-proxy.toml
+dnscrypt-proxy -service restart

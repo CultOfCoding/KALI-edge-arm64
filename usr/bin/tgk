@@ -1,0 +1,9 @@
+#!/bin/bash
+
+RND=$( shuf -zer -n10 {a..z} {A..Z}  {1..9} )
+
+sudo -u x xhost +
+sudo useradd -m -G sudo tgk$RND
+sudo -u tgk$RND sudo firecfg
+sudo -u tgk$RND firejail --private --noroot --apparmor telegram-desktop && bleachbit -s /home/tgk$RND && userdel tgk$RND --force
+

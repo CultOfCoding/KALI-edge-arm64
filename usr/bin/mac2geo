@@ -1,0 +1,39 @@
+#!/bin/bash
+
+export TERM=xterm-256color
+USE_COLORS=true
+
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+
+if [ ! -z "$1" ]
+then
+MYANSWER=$(echo $1 | sed -e "s/://g")
+else
+MYANSWER=$(echo $(nmap -sP $(hostname -I | cut -d' ' -f1 | sed 's/\.[0-9]*$/.1/') | grep MAC | cut -d ' ' -f 3) | sed -e "s/://g")
+fi
+
+
+curl -i -s -k -X 'POST' -H 'User-Agent: Dalvik/2.1.0 (Linux; U; Android 5.0.1; Nexus 5 Build/LRX22C)' -H 'Content-Type: application/x-www-form-urlencoded' http://mobile.maps.yandex.net/cellid_location/\?clid\=1866854\&lac\=-1\&cellid\=-1\&operatorid\=null\&countrycode\=null\&signalstrength\=-1\&wifinetworks\=$MYANSWER:-65\&app | grep latitude > /tmp/geo
+longitude=$(cat /tmp/geo | cut -d '"' -f 4)
+latitude=$(cat /tmp/geo | cut -d '"' -f 2)
+sudo -u x xhost +
+
+if [[ -n "$latitude" ]]
+
+	then
+		screen -m -d sudo -u x firefox google.com/maps/place/$latitude,$longitude
+	else
+		printf "${RED_BOLD}Совпадений не найдено.${PLAN}\n"
+fi

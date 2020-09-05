@@ -1,0 +1,96 @@
+#!/bin/bash
+
+{
+
+if test "$1" = "label"
+
+then
+
+hue=$[ ( $RANDOM % 250 ) ]
+hueoldcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+
+userinfos=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/userinfo))
+dates=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/datekey))
+
+convert -family CODE3X -font CODE3X-R -density 383 -fill black -stroke black  -strokewidth 0,2  -gravity Center -trim -border 4 -bordercolor white label:$userinfos /tmp/ooo.png
+convert /usr/share/backgrounds/kali/background_dark_clear.png /tmp/ooo.png -geometry +260+463 -composite /tmp/ooo1.png
+
+convert -font helvetica -negate -density 130 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 -bordercolor black label:$dates /tmp/aaa.png
+convert /tmp/ooo1.png /tmp/aaa.png -geometry +295+469 -composite /tmp/aaa1.png
+
+convert -family hack -font Hack-Regular -alpha background  -density 1000  -fill black -stroke black  -strokewidth 10 -gravity Center -trim -border 9 label:"$2" /tmp/bbb.png
+convert /tmp/aaa1.png /tmp/bbb.png -gravity East -geometry +140+80 -composite /home/x/Downloads/labeled-"$2".png
+convert /home/x/Downloads/labeled-"$2".png -modulate 110,110,$hue /home/x/Downloads/labeled-"$2".png
+
+qrencode -o /tmp/123 -m 2 -s 2.8 $(cat /usr/share/userinfo)
+convert /home/x/Downloads/labeled-"$2".png /tmp/123 -gravity West -geometry +200+-44 -composite /usr/share/backgrounds/kali/background_dark.png
+
+cd /usr/share/themes/_unkn0wn
+if [ -n "$(grep -r -w b90000)" ] ; then hueoldcolor="b90000" ; fi
+
+huenewcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+find . -type f -print0 | xargs -0 sed -i "s/$hueoldcolor/$huenewcolor/g"
+
+elif test "$1" = "random"
+
+then
+
+hue=$[ ( $RANDOM % 200 ) ]
+hueoldcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+
+userinfos=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/userinfo))
+dates=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/datekey))
+
+convert -family ODE3X -font CODE3X-R -density 383 -fill black -stroke black  -strokewidth 0,2  -gravity Center -trim -border 4 -bordercolor white label:$userinfos /tmp/ooo.png
+convert /usr/share/backgrounds/kali/background_dark_clear.png /tmp/ooo.png -geometry +260+463 -composite /tmp/ooo1.png
+
+convert -font helvetica -alpha background -negate -density 120 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 -bordercolor black label:$dates /tmp/aaa.png
+convert /tmp/ooo1.png /tmp/aaa.png -geometry +295+469 -composite /tmp/aaa1.png
+
+convert /tmp/aaa1.png -modulate 110,110,$hue /tmp/aaa1.png
+
+qrencode -o /tmp/123 -m 2 -s 2.8 $(cat /usr/share/userinfo)
+convert /tmp/aaa1.png /tmp/123 -gravity  West -geometry +200+-44 -composite /usr/share/backgrounds/kali/background_dark.png
+
+cd /usr/share/themes/_unkn0wn
+if [ -n "$(grep -r -w b90000)" ] ; then hueoldcolor="b90000" ; fi
+
+huenewcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+find . -type f -print0 | xargs -0 sed -i "s/$hueoldcolor/$huenewcolor/g"
+
+
+elif test "$1" = "original"
+
+then
+
+
+hue=$[ ( $RANDOM % 200 ) ]
+hueoldcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+
+userinfos=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/userinfo))
+dates=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/datekey))
+
+convert -family ODE3X -font CODE3X-R -density 383 -fill black -stroke black  -strokewidth 0,2  -gravity Center -trim -border 4 -bordercolor white  abel:$userinfos /tmp/ooo.png
+convert /usr/share/backgrounds/kali/background_dark_clear.png /tmp/ooo.png -geometry +260+463 -composite /tmp/ooo1.png
+
+convert -font helvetica -alpha background -negate -density 120 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 -bordercolor black label:$dates /tmp/aaa.png
+convert /tmp/ooo1.png /tmp/aaa.png -geometry +295+469 -composite /tmp/aaa1.png
+
+qrencode -o /tmp/123 -m 2 -s 2.8 $(cat /usr/share/userinfo)
+convert /tmp/aaa1.png /tmp/123 -gravity  West -geometry +200+-44  -composite /usr/share/backgrounds/kali/background_dark.png
+
+cd /usr/share/themes/_unkn0wn
+if [ -n "$(grep -r -w b90000)" ] ; then hueoldcolor="b90000" ; fi
+
+huenewcolor=$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+322+595 rgb:- | xxd -g3 -c3 | awk '{print $2}')
+find . -type f -print0 | xargs -0 sed -i "s/$hueoldcolor/$huenewcolor/g"
+
+
+else
+
+dnscrypt-proxy -service restart
+
+fi
+
+}&>/dev/null
+

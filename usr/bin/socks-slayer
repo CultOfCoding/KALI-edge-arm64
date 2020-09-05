@@ -1,0 +1,35 @@
+#!/bin/bash
+
+clear
+echo ""
+export TERM=xterm-256color
+USE_COLORS=true
+echo 'PermitTTY yes'>>/etc/ssh/sshd_config
+systemctl restart ssh
+
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+printf "${YELLOW_BOLD}Сейчас из вашего VPS-сервера будет сделан SOCKS5-сервер, с зеркальным DNS и Windows телеметрией\n
+${RED_BOLD}ВНИМАНИЕ!!! ПОСЛЕ УСТАНОВКИ ПОДКЛЮЧЕНИЕ ПО SSH БУДЕТ НЕВОЗМОЖНО!!!${PLAIN}\n"
+
+rm /root/.ssh/known_hosts
+
+read -p "Введите IP-аддресс Вашего VPS: " vpsip
+read -p "Введите пароль от root пользователя: " rootpass
+
+sshpass -p "$rootpass" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no /opt/modules/socksslayer.sh root@"$vpsip":/root/
+sshpass -p "$rootpass" ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@"$vpsip" bash socksslayer.sh
+echo ""
+printf "${BOLD_GREEN}Все готово, через минуту сможете подключаться. Порт для подключения ${RED}:55454${PLAIN}\n"
+

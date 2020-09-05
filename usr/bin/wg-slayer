@@ -1,0 +1,73 @@
+#!/bin/bash
+
+clear
+read -p "Введите имя пользователя, ip сервера в формате login@ip: " login
+read -p "Введите название для тунеля: " conf
+
+rm /root/.ssh/known_hosts
+ssh-copy-id $login
+
+scp /opt/modules/ssh-slayer/slayer.sh $login:/root/
+ssh $login bash slayer.sh
+
+ipaddress=$(echo $(ssh $login curl ifconfig.me))
+
+scp /opt/modules/ssh-slayer/wg-slayer.sh $login:/root/
+ssh $login echo nameserver 1.0.0.1>/etc/resolv.conf
+ssh $login bash wg-slayer.sh
+
+scp $login:/root/wg0-laptop.conf /etc/wireguard/"$conf".conf
+ssh $login reboot
+
+gateway=$(echo $(/usr/bin/cat /etc/wireguard/"$conf".conf | grep "DNS" | cut -c7-))
+wgiface=$(echo $(ls /sys/class/net | grep -v lo | grep -v eth | grep -v wlan))
+
+echo "$ipaddress  $conf">>/etc/hosts
+
+/usr/bin/cat <<EOF>wg-"$conf"-up
+#!/bin/bash
+wg-quick down $wgiface
+iptables -t nat -F
+iptables -t raw -F
+iptables -t mangle -F
+iptables -F
+iptables-save
+chattr -i /etc/resolv.conf
+echo nameserver "$gateway" | tee /etc/resolv.conf
+wg-quick up $conf
+ifconfig $conf mtu 1500
+EOF
+
+/usr/bin/cat <<EOF>wg-"$conf"-down
+#!/bin/bash
+wg-quick down $conf
+echo nameserver 127.0.0.1 | tee /etc/resolv.conf
+wg-quick up $wgiface
+chattr +i /etc/resolv.conf
+EOF
+
+/usr/bin/cat <<EOF>wg-"$conf"-remove
+#!/bin/bash
+rm /usr/bin/wg-"$conf"*
+EOF
+
+chmod +x wg-"$conf"*
+mv wg-"$conf"* /usr/bin/
+
+
+clear
+echo ""
+echo ""
+echo ""
+echo ""
+
+
+echo ""
+echo 	Вэб-интерфейс: http://"$conf":9090 Пароль: r@@t31337
+echo ""
+echo 	Конфиг: 
+echo 	wg-"$conf"-up - поднять
+echo 	wg-"$conf"-down - опустить
+echo 	wg-"$conf"-remove - удалить кофигурацию из системы
+echo ""
+echo ""

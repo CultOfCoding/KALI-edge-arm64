@@ -1,0 +1,76 @@
+#!/bin/bash
+
+HEIGHT=24
+WIDTH=200
+CHOICE_HEIGHT=16
+BACKTITLE="Установка дополнительных модулей"
+TITLE="_unkn0wn:"
+MENU="Выберете модуль, который вы хотите установить:"
+
+OPTIONS=(1  "payloads - создание невидимых для антивируса backdoors с помощью metasploit-framework"
+         2  "owasp-netattacker - автоматический аудит вэб ресурсов"
+         3  "phonesploit - шелл через adb - android device bridge, к любому устройству. Почувствуй себя в <<безопасности>> :)"
+         4  "war2vps - настроить VPS на нужный лад"
+         5  "wg-slayer - сделать из VPS wireguard-vpn, установить в систему конфиги с нужными параметрами"
+         6  "socks-slayer - сделать из VPS SOCKS-proxy сервер, зеркальный DNS и Windows телеметрия в подарок" 
+ 	 7  "b0mb3r - передай привет другу или теще"
+         8  "wifite + airgeddon - автоматический взлом wifi-сетей"
+	 9  "thechoice - швейцарский нож. неплохой"
+	 10 "msfhelper - обширный пентест с помощью metasploit-framework"
+	 11 "x4k-catch - автоматический <сбор> урожая в виде хэндшейков, а так же привязка их к GPS координатам"
+	 12 "BURPsuite PRO - про версия. Цена  <From €3,499 per year>"
+	 13 "pwnbox - для эстетов, есть все и даже больше")
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+case $CHOICE in
+        1)
+            cd /opt/modules && /opt/modules/payloads.sh 
+            ;;
+        2)
+            cd /opt/modules && /opt/modules/nettacker.sh 
+            ;;
+        3)
+            cd /opt/modules && /opt/modules/phonesploit.sh 
+            ;;
+        4)
+            cd /opt/modules/warvpsserver && /usr/bin/war2vps 
+            ;;
+        5)
+            cd /opt/modules/ssh-slayer && /usr/bin/wg-slayer  
+            ;;
+        6)
+            cd /opt/modules && /usr/bin/socks-slayer  
+            ;;
+	7)
+	    pip3 install b0mb3r && sed -i 's+    <span class="text-muted">Made by <a href="https://github.com/crinny">crinny</a> with</span> <span class="heart">&#10084;&#65039;</span>++g' /usr/local/lib/python3.8/dist-packages/b0mb3r/app/templates/index.html && echo 'alias b0mb3r="sudo -u x b0mb3r"'>>/root/.zshrc
+            ;;
+        8)
+            cd /opt/modules/ && /opt/modules/wifite.sh 
+            ;;
+        9)
+            cd /opt/modules/ && /opt/modules/thechoice.sh 
+            ;;
+        10)
+            /opt/modules/msfhelper.sh 
+            ;;
+        11)
+            cd /opt/modules/hashcatch && ./hashcatch.sh 
+            ;;
+
+	12)
+	    wget x4k.me/system/burp.zip && unzip -p '31337@_' burp.zip -d /opt/ && chmod +x /opt/burp* && echo 'alias burpsuitepro="cd /opt && sudo -u x ./burploader.jar"'>>/root/.zshrc && apt-get -y install burpsuite
+	    ;;
+        13)
+            /opt/modules/pwnbox.sh 
+            ;;
+
+
+esac
+

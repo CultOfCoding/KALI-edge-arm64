@@ -1,0 +1,60 @@
+#!/bin/bash
+
+mount -t proc proc /proc
+
+sync; echo 3 > /proc/sys/vm/drop_caches
+swapoff -a && swapon -a
+sleep 1
+
+bleachbit system.memory --clean 
+
+firejail --overlay-clean  
+
+bleachbit -s /home/x/.mozilla
+
+cd /home/
+{
+ls | grep tgk | xargs -L 1 userdel --force  
+}&>/dev/null
+
+ls | grep tgk | xargs -L 1 bleachbit -s
+
+hidemyass -uwbl -n root -c
+hidemyass -uwbl -n x -c
+
+{
+control &
+sleep 1
+}&>/dev/null
+
+bleachbit --list | grep -E "[a-z0-9_\-]+\.[a-z0-9sudo_\-]+" | grep -v system.memory | grep -v apt.package_lists | grep -v system.free_disk_space | xargs bleachbit --clean  
+bleachbit /home/*/.local/share/TelegramDesktop  
+bleachbit -s /home/*/Downloads/*  
+bleachbit -s /home/*/.cache  
+
+beachbit -s /home/x/.mozilla
+tar xf /usr/share/profile.tar /home/x/
+chown -hR x /home/x/.mozilla
+
+sed -i 's+Kali GNU/Linux+Project [unkn0wn]+g' /boot/grub/grub.cfg
+
+bleachbit -s /root/.ssh/known_hosts  
+bleachbit -s /home/*/.ssh/known_hosts  
+bleachbit -s /root/.zsh_history  
+bleachbit -s /root/.bash_history  
+bleachbit -s /home/*/.zsh_history  
+bleachbit -s /home/*/.bash_history  
+bleachbit -s /root/.zcompdump*
+bleachbit -s /home/*/.zcompdump*
+
+bleachbit -s /tmp/*
+
+{
+wget -O /opt/changes x4k.me/system/changes
+}&>/dev/null
+
+killall savd
+killall savd
+
+sudo -u x sudo firecfg
+sudo -u root reboot

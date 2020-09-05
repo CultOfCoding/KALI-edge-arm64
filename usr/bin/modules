@@ -1,0 +1,97 @@
+#!/bin/bash
+
+HEIGHT=24
+WIDTH=200
+CHOICE_HEIGHT=17
+
+MENU="Выберете модуль, который вы хотите установить:"
+
+OPTIONS=(1   "Заменить dnscrypt-proxy на cloudflared-dns-over-https"
+         2   "Заменить dnscrypt-proxy на продвинутый Technitium. Управление localhost:5380"
+         3   "Вернуть обратно dnscrypt-proxy"
+         4   "Установить ADblock на уровне DNS. Только с dnscrypt-proxy!!"
+
+	 21  "Установить эмулятор Android - Android Studio [см. папку Pictures после установки]"
+	 22  "Установить эмулятор Android - Genymotion [рекомендуемый]"
+	 23  "Установить MacOS VM - полная копия MacBook Pro 12,1 2020"
+
+         31  "x0vncserver - повтор экрана черз 137 порт VNC"
+         32  "Bittracker - визуальный трейс bitcoin кошельков"
+
+	 41  "proxy-to-country - удобный парсинг прокси-листов по гео"
+	 42  "freedownloadmanager - быстрый и легкий менеджер закачек"
+	 43  "anydesk - управление удаленными рабочими столами [ВНИМАНИЕ: ЗНАЧИТЕЛЬНОЕ УМЕНЬШЕНИЕ УРОВНЯ БЕЗОПАСНОСТИ СИСТЕМЫ!!!]"
+	 44  "Atom - продвинутый текстовый редактор с подсветкой синтаксиса и огромным набором модулей"
+
+         51  "Драйвера для чипа realtek 8192eu с режимом монитора"
+	 52  "Выбрать режим энергосбережения и производительности Intel CPU"
+
+         99  "Установить cryptfs-nuke пароль. Необходимо наличие LVM и crypt-fs")
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+
+case $CHOICE in
+        1)
+            cd /opt/modules && /opt/modules/cloudflared.sh 
+            ;;
+        2)
+            cd /opt/modules && /opt/modules/technitium.sh 
+            ;;
+        3)
+            cd /opt/modules && /opt/modules/dnscrypt-proxy.sh 
+            ;;
+        4)
+            cd /opt/modules && /opt/modules/hblock.sh 
+            ;;
+        21)
+            cd /opt/modules && /opt/modules/android-studio.sh 
+            ;;
+        22)
+            cd /opt/modules && /opt/modules/geny.sh 
+            ;;
+        23)
+            macvm 
+            ;;
+        31)
+            cd /opt/modules && /opt/modules/localvnc.sh 
+            ;;
+        32)
+            cd /opt/modules && /opt/modules/bittracker.sh 
+            ;;
+        41)
+            cd /opt/modules && /opt/modules/p2c.sh
+            ;;
+        42)
+            cd /opt/modules && /opt/modules/fdm.sh 
+            ;;
+        43)
+            cd /opt/modules && /opt/modules/anydesk.sh 
+            ;;
+	44)
+	    LATEST_URL="https://api.github.com/repos/atom/atom/releases/latest" 
+	    mkdir /opt/atom
+	    cd /opt/atom && wget -nv --show-progress $(curl -sL "$LATEST_URL" | grep arm64.deb | grep -v musl | grep browser_download_url | head -1 | cut -d \" -f 4) && dpkg -i *.deb 
+	    apt-get -y --fix-broken install
+	    modules
+	    ;;
+        51)
+            cd /opt/modules && /opt/modules/realtek.sh 
+            ;;
+        52)
+            /usr/bin/performance 
+            ;;
+        99)
+            sudo /opt/modules/nukesetup.sh 
+            ;;
+
+
+
+esac
+

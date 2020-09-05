@@ -1,0 +1,51 @@
+#!/bin/bash
+
+{
+
+cd /opt/wallz
+
+if [ -z "$1" ]
+
+	then 
+		imgsource="$(echo $(ls | shuf -n 1))"
+
+elif [[ "$1"  =~ ^[a-zA-Z0-9]+$ ]]
+
+	then
+		imgsource="$(echo $(ls | shuf -n 1))"
+		label="$1"
+
+	else
+		imgsource="$1"
+		label="$2"
+fi
+
+#userinfos=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/userinfo))
+#dates=$(echo $(openssl enc -d -base64 -aes-256-cbc -pbkdf2 -salt -k inst@ller -in /usr/share/datekey))
+
+datenow=$(date +%x)
+userinfos="Kali-Edge"
+dates=$datenow
+qrencode -o /tmp/123 -m 2 -s 2.8 $(echo XN--90A5AI.COM)
+
+convert -family CODE3X -font CODE3X-R -density 383 -fill black -stroke black  -strokewidth 0,2  -gravity Center -trim -border 4 -bordercolor white label:$userinfos /tmp/ooo.png
+convert $imgsource /tmp/ooo.png -gravity Center -geometry +0+20 -composite /tmp/ooo1.png
+convert -font helvetica -negate -density 130 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 -bordercolor black label:$dates /tmp/aaa.png
+
+convert /tmp/ooo1.png /tmp/aaa.png -gravity Center -geometry +0+8 -composite /tmp/aaa1.png
+convert /tmp/aaa1.png /tmp/123 -gravity Center -geometry -160+20 -composite /usr/share/backgrounds/kali/background_dark.png
+
+		convert -family hack -font Hack-Regular -alpha background  -density 1000  -fill black -stroke black  -strokewidth 10 -gravity Center -trim -border 9 label:"$label" /tmp/bbb.png
+
+DIRECTION="$(convert /usr/share/backgrounds/kali/background_dark.png -crop 1x1+1650+900 -depth 8 txt: | grep black)"
+
+if [ -n "$DIRECTION" ]
+	then
+		convert /usr/share/backgrounds/kali/background_dark.png /tmp/bbb.png -gravity East -geometry +150+10 -composite /usr/share/backgrounds/kali/background_dark.png
+	else
+                convert /usr/share/backgrounds/kali/background_dark.png /tmp/bbb.png -gravity West -geometry +150+10 -composite /usr/share/backgrounds/kali/background_dark.png
+fi
+
+rm /tmp/*.png
+
+}&>/dev/null

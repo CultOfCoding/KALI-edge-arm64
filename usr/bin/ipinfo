@@ -1,0 +1,42 @@
+#!/bin/bash
+
+export TERM=xterm-256color
+USE_COLORS=true
+
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    PLAIN='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    PLAIN_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+ipinfo() {
+    external_ip="$1"
+    result=$(curl --silent https://ipinfo.io/$external_ip)
+
+    json_ip=$(echo "$result" | jq -r ".ip")
+    json_hostname=$(echo "$result" | jq -r ".hostname")
+    json_city=$(echo "$result" | jq -r ".city")
+    json_region=$(echo "$result" | jq -r ".region")
+    json_country=$(echo "$result" | jq -r ".country")
+    json_loc=$(echo "$result" | jq -r ".loc")
+    json_org=$(echo "$result" | jq -r ".org")
+    json_postal=$(echo "$result" | jq -r ".postal")
+
+    printf "${RED_BOLD}IP-Address: ${PLAIN}${json_ip}\n"
+    printf "${GREEN_BOLD}Hostname: ${PLAIN}${json_hostname}\n"
+    printf "${GREEN_BOLD}Network: ${PLAIN}${json_org}\n"
+    printf "${BLUE_BOLD}City: ${PLAIN}${json_city}, ${json_region}, ${json_country}\n"
+    printf "${GREEN}Postal Code: ${PLAIN}${json_postal}\n"
+    printf "${GREEN}Latitude/Longitude: ${PLAIN}${json_loc}\n"
+}
+
+echo ""
+ipinfo $1
+echo ------------------------------------------------

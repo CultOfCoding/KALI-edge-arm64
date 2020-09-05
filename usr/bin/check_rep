@@ -1,0 +1,6 @@
+#!/bin/bash
+python3 /usr/share/check_reputation/check_rep.py $1 --fg
+mv /usr/share/check_reputation/geomap/ip_map.html /home/x/Downloads/ip_map.html
+{
+sudo -u x firefox /home/x/Downloads/ip_map.html &
+}&>/dev/null

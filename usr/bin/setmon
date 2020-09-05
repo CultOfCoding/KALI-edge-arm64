@@ -1,0 +1,8 @@
+#!/bin/bash
+
+sudo ip link set $1 down
+sleep 1
+sudo iw dev $1 set type monitor
+sudo ip link set $1 name "$1"mon
+sleep 1
+sudo ip link set "$1"mon up

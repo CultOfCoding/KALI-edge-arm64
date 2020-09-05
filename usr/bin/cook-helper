@@ -1,0 +1,60 @@
+#!/bin/bash
+
+export TERM=xterm-256color
+
+USE_COLORS=true
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+
+printf "${YELLOW}"
+read -p "Введите слово, по которому будет осуществлен поиск (содержится в url): " word
+printf "${PLAIN}\n"
+
+printf "${BLUE}"
+read -p "Введите количество случайно-выбранных строк: " hm
+printf "${PLAIN}\n"
+
+
+if [ ! -f /opt/alexa.csv ]
+then
+printf "${GREEN_BOLD}"
+mkdir /tmp/alexa && cd /tmp/alexa
+wget -nv --show-progress http://s3.amazonaws.com/alexa-static/top-1m.csv.zip
+unzip top-1m.csv.zip &>/dev/null
+mv top-1m.csv /opt/alexa.csv
+rm -r /tmp/alexa
+fi
+echo ""
+
+cd /tmp
+cat /opt/alexa.csv | grep "$word" > "$word".txt
+shuf -n "$hm" "$word".txt | cut -d"," -f 2 | awk '{print "http://"$0}' > resulth.txt
+
+printf "${RED_BOLD}plain         ${PLAIN_BOLD}Ссылка для скачивания: ${PLAIN}    "
+cat resulth.txt | sed 's+http://++g' > resultp.txt
+ix resultp.txt 
+echo ""
+
+
+printf "${RED_BOLD}http          ${PLAIN_BOLD}Ссылка для скачивания: ${PLAIN}    "
+ix resulth.txt
+echo ""
+
+
+printf "${RED_BOLD}https         ${PLAIN_BOLD}Ссылка для скачивания: ${PLAIN}    "
+cat resulth.txt | sed 's+http+https+g' > results.txt
+ix results.txt 
+echo ""
+
+	 

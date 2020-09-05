@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.9.4
+Type=Application
+Name=wttr
+Comment=tilda
+Exec=/opt/bleachbit
+OnlyShowIn=XFCE;
+RunHook=0
+StartupNotify=true
+Terminal=true
+Hidden=false
+

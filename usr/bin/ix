@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+export TERM=xterm-256color
+
+USE_COLORS=true
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+ix() {
+    local opts
+    local OPTIND
+    [ -f "$HOME/.netrc" ] && opts='-n'
+    while getopts ":hd:i:n:" x; do
+        case $x in
+            h) echo "ix [-d ID] [-i ID] [-n N] [opts]"; return;;
+            d) $echo curl $opts -X DELETE ix.io/$OPTARG; return;;
+            i) opts="$opts -X PUT"; local id="$OPTARG";;
+            n) opts="$opts -F read:1=$OPTARG";;
+        esac
+    done
+    shift $(($OPTIND - 1))
+    [ -t 0 ] && {
+        local filename="$1"
+        shift
+        [ "$filename" ] && {
+            curl -sL $opts -F f:1=@"$filename" $* ix.io/$id
+            return
+        }
+    }
+    echo ""
+    echo ""
+    curl -sL $opts -F f:1='<-' $* ix.io/$id
+
+}
+
+printf "\n	"
+ix $* | sed -e "s+http://++g" > /tmp/ix
+/usr/bin/cat /tmp/ix | sed -n '/^\s*$/!p' | xclip -selection c
+printf "${YELLOW}"
+cat /tmp/ix
+printf "${PLAIN}"

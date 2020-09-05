@@ -1,0 +1,30 @@
+#!/bin/bash
+
+{
+rm /tmp/output*
+}&>/dev/null
+
+sudo chown -hR x /tmp
+mkdir /home/x/Documents/checker
+filename=$(date -u +"%j%H%M")
+
+printf "$1" | python /usr/bin/checker.py
+
+sed 's+:+ +' /tmp/output.txt > /tmp/$filename.checker
+rm /tmp/output.txt
+
+/usr/bin/cat /tmp/$filename.checker | xargs -L 1 /usr/bin/check.sh | tee /home/x/Documents/checker/$filename.txt
+echo '------------------------------------------------' >> /home/x/Documents/checker/$filename.txt
+/usr/bin/cat /tmp/output.txt >> /home/x/Documents/checker/$filename.txt
+
+chown -hR x /home/x/Documents
+
+cat<<EOF>/home/x/Desktop/$filename.checker
+#!/bin/bash
+xfce4-terminal -e 'cat /home/x/Documents/checker/$filename.txt' --hold
+EOF
+
+chmod +x /home/x/Desktop/$filename.checker
+chown x /home/x/Desktop/$filename.checker
+
+read -p "Нажмите [Enter] чтобы выйти..." exit

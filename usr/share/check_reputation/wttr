@@ -1,0 +1,29 @@
+#!/bin/bash
+
+result=$(curl --silent https://ipinfo.io/$(curl ifconfig.me))
+city=$(echo "$result" | jq -r ".city")
+userinfos=$(echo $(openssl enc -d -base64 -aes-256-cbc -salt -k inst@ller -in /usr/share/userinfo))
+dates=$(echo $(openssl enc -d -base64 -aes-256-cbc -salt -k inst@ller -in /usr/share/datekey))
+
+cd /tmp
+
+/usr/bin/cat<<EOF>wttr
+#!/bin/bash
+cd /tmp
+
+/opt/dnscrypt-proxy/dnscrypt-proxy -service restart
+sleep 1
+
+convert -font helvetica -alpha background -negate -density 140 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 label:$userinfos ooo.png
+convert /usr/share/backgrounds/kali/background_dark_clear.png ooo.png -geometry +495+498 -composite yo.png
+
+convert -font helvetica -alpha background -negate -density 140 -fill black -stroke black  -strokewidth 2   -gravity Center -trim -border 2 -bordercolor black label:$dates  aaa.png
+convert yo.png aaa.png -geometry +665+497 -composite ya.png
+
+convert ya.png <( curl wttr.in/Moscow.png?format="%l+:+%c+%t" ) -geometry +1210+495 -composite /home/x/1.png
+mv /home/x/1.png /usr/share/backgrounds/kali/background_dark.png 
+rm yo.png ooo.png aaa.png
+EOF
+
+shc -f wttr -o wttr -SU && mv wttr /usr/bin/
+

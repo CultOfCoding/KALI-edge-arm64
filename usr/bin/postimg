@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Escape code
+esc=`echo -en "\033"`
+
+# Set colors
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+
+cp $1 /tmp/img.jpg
+cd /tmp
+
+echo ""
+mat2 /tmp/img.jpg
+mv img.cleaned.jpg img.jpg
+
+ipimg=$(curl --silent --proxy 127.0.0.1:5566 ifconfig.me)
+curl --proxy 127.0.0.1:5566 -# --location --request POST "https://api.imgbb.com/1/upload?key=f26af4f49547d0c2e431b6bdde030d45" --form "image=@/tmp/img.jpg" | jq | grep "display_url" > /tmp/postimg
+
+echo ""
+cat /tmp/postimg | sed -e 's+"display_url": "++g' | sed -e 's+",++g' > /tmp/gpostimg
+printf "${GREEN}Прямая ссылка: ${PLAIN}$(cat /tmp/gpostimg)
+${RED_BOLD}tor ip:            ${PLAIN}$ipimg\n"
+
+{
+bleachbit -s /tmp/img.jpg
+bleachbit -s /tmp/postimg
+}&>/dev/null

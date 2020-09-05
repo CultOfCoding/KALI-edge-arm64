@@ -1,3 +1,2 @@
-# kali-arm64
+# unknw0n-arm64
 
-kali-linux-arm64 for Khadas Edge

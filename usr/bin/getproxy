@@ -1,0 +1,63 @@
+#!/bin/bash
+
+clear
+echo ""
+echo ""
+
+export TERM=xterm-256color
+USE_COLORS=true
+
+
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    BLUE='\033[0;34m'
+    YELLOW='\033[0;33m'
+    PLAIN='\033[0m'
+
+    RED_BOLD='\033[1;31m'
+    GREEN_BOLD='\033[1;32m'
+    BLUE_BOLD='\033[1;34m'
+    YELLOW_BOLD='\033[1;33m'
+    PLAIN_BOLD='\033[1;37m'
+
+
+printf "Укажите тип прокси (${RED}HTTPS SOCKS4 SOCKS5 ALL(все)${PLAIN}). Можно как один, так и несколько: "
+read -p ' ' type
+printf "${YELLOW}Введите название страны, которой хотите получить SOCKS5 proxy.${PLAIN}\n
+Возможно несколько стран подряд, без запятой. Используйте ${RED_BOLD}ДВЕ ЗАГЛАВНЫЕ БУКВЫ!!${PLAIN}\n"
+read -p 'Страна: ' country 
+read -p 'Количество: ' much
+
+{
+sudo chown -hR x /tmp
+mkdir /home/x/Documents/checked
+filename=$(date -u +"%j%H%M")
+control
+
+if [ "$type" = "ALL" ]; then
+proxybroker find --types HTTPS SOCKS4 SOCKS5 --countries $country --limit $much -o /tmp/"$country"$filename.txt
+else
+proxybroker find --types $type --countries $country --limit $much -o /tmp/"$country"$filename.txt
+fi
+}&>/dev/null
+
+
+grep -Po "([0-2]?\d?\d\.){3}[0-2]?\d?\d:(\d?){5}" /tmp/"$country"$filename.txt | sed -e 's+:+ +g' > /tmp/"$country"$filename.grep
+
+
+cat /tmp/"$country"$filename.grep | xargs -L 1 check.sh | tee /home/x/Documents/checked/"$country "$filename.txt 
+echo '------------------------------------------------' >> /home/x/Documents/checked/"$country "$filename.txt
+cat /tmp/"$country"$filename.txt >> /home/x/Documents/checked/"$country "$filename.txt
+
+
+chown -hR x /home/x/Documents
+
+cat<<EOF>/home/x/Desktop/"$country "$filename
+#!/bin/bash
+xfce4-terminal -e 'cat /home/x/Documents/checked/"$country "$filename.txt' --hold
+EOF
+
+chmod +x /home/x/Desktop/"$country "$filename
+chown x /home/x/Desktop/"$country "$filename
+
+read -p "Нажмите [Enter] чтобы выйти..." exit

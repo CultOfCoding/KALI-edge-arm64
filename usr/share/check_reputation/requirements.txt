@@ -1,0 +1,14 @@
+argparse
+colorama
+colored
+coloredlogs
+dnspython
+folium
+futures
+geoip2
+python-whois
+requests
+ruamel.yaml
+simplejson
+tqdm
+verboselogs

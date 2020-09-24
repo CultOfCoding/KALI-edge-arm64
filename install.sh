@@ -33,6 +33,48 @@ fanfix.sh &
 wait-online
 #@@
 
+#DNS-crypt
+LATEST_URL="https://api.github.com/repos/DNSCrypt/dnscrypt-proxy/releases/latest"
+INSTALL_DIR=/opt/dnscrypt-proxy
+workdir=/tmp/dnscrypt
+mkdir $workdir
+wget $(curl -sL "$LATEST_URL" | grep dnscrypt-proxy-linux_arm64- | grep browser_download_url | head -1 | cut -d \" -f 4) && tar xf dnscrypt-proxy-linux_arm64-* -C $workdir
+sudo chattr -i /etc/resolv.conf
+sudo mkdir $INSTALL_DIR
+sudo cp -r --preserve=all $workdir/linux-arm64/example-whitelist.txt $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/example-forwarding-rules.txt $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/example-cloaking-rules.txt $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/LICENSE $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/example-dnscrypt-proxy.toml $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/example-blacklist.txt $INSTALL_DIR/
+sudo cp -r --preserve=all $workdir/linux-arm64/dnscrypt-proxy $INSTALL_DIR/
+sudo cp -r --preserve=all $INSTALL_DIR/example-dnscrypt-proxy.toml $INSTALL_DIR/dnscrypt-proxy.toml
+sudo sed -i "30c\server_names = [\'cloudflare\']" $INSTALL_DIR/dnscrypt-proxy.toml
+sudo sed -i 's+127.0.0.1:53+127.0.0.1:5353+g' $INSTALL_DIR/dnscrypt-proxy.toml
+
+sudo systemctl stop systemd-resolved
+sudo systemctl disable systemd-resolved
+echo 'port=53
+server=127.0.0.1#5353' > /etc/dnsmasq.conf
+sudo rm -r /etc/resolv.conf
+echo nameserver 127.0.0.1 > /tmp/resolv.conf
+sudo cp -r /tmp/resolv.conf /etc/resolv.conf
+sudo chattr +i /etc/resolv.conf
+sudo $INSTALL_DIR/dnscrypt-proxy -service install
+sudo ln -s $INSTALL_DIR/dnscrypt-proxy /bin/
+sudo systemctl enable dnscrypt-proxy
+sudo $INSTALL_DIR/dnscrypt-proxy -service start
+sudo rm -r $workdir /tmp/resolv.conf
+sudo sed -i 's+cache_size = 4096+cache_size = 256000+g' /opt/dnscrypt-proxy/dnscrypt-proxy.toml
+systemctl enable dnsmasq
+systemctl restart dnsmasq
+dnscrypt-proxy -service restart
+
+
+#@@
+wait-online
+#@@
+
 echo 'deb http://http.kali.org/kali kali-rolling main non-free contrib'>>/etc/apt/sources.list
 wget http://http.kali.org/pool/main/k/kali-archive-keyring/kali-archive-keyring_2020.2_all.deb && dpkg -i kali-archive-keyring_2020.2_all.deb && rm kali*
 
@@ -343,48 +385,6 @@ sleep 2
 wait-online
 #@@
 
-#DNS-crypt
-LATEST_URL="https://api.github.com/repos/DNSCrypt/dnscrypt-proxy/releases/latest"
-INSTALL_DIR=/opt/dnscrypt-proxy
-workdir=/tmp/dnscrypt
-mkdir $workdir
-wget $(curl -sL "$LATEST_URL" | grep dnscrypt-proxy-linux_arm64- | grep browser_download_url | head -1 | cut -d \" -f 4) && tar xf dnscrypt-proxy-linux_arm64-* -C $workdir
-sudo chattr -i /etc/resolv.conf
-sudo mkdir $INSTALL_DIR
-sudo cp -r --preserve=all $workdir/linux-arm64/example-whitelist.txt $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/example-forwarding-rules.txt $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/example-cloaking-rules.txt $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/LICENSE $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/example-dnscrypt-proxy.toml $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/example-blacklist.txt $INSTALL_DIR/
-sudo cp -r --preserve=all $workdir/linux-arm64/dnscrypt-proxy $INSTALL_DIR/
-sudo cp -r --preserve=all $INSTALL_DIR/example-dnscrypt-proxy.toml $INSTALL_DIR/dnscrypt-proxy.toml
-sudo sed -i "30c\server_names = [\'cloudflare\']" $INSTALL_DIR/dnscrypt-proxy.toml
-sudo sed -i 's+127.0.0.1:53+127.0.0.1:5353+g' $INSTALL_DIR/dnscrypt-proxy.toml
-
-sudo systemctl stop systemd-resolved
-sudo systemctl disable systemd-resolved
-echo 'port=53
-server=127.0.0.1#5353' > /etc/dnsmasq.conf
-sudo rm -r /etc/resolv.conf
-echo nameserver 127.0.0.1 > /tmp/resolv.conf
-sudo cp -r /tmp/resolv.conf /etc/resolv.conf
-sudo chattr +i /etc/resolv.conf
-sudo $INSTALL_DIR/dnscrypt-proxy -service install
-sudo ln -s $INSTALL_DIR/dnscrypt-proxy /bin/
-sudo systemctl enable dnscrypt-proxy
-sudo $INSTALL_DIR/dnscrypt-proxy -service start
-sudo rm -r $workdir /tmp/resolv.conf
-sudo sed -i 's+cache_size = 4096+cache_size = 256000+g' /opt/dnscrypt-proxy/dnscrypt-proxy.toml
-systemctl enable dnsmasq
-systemctl restart dnsmasq
-dnscrypt-proxy -service restart
-
-
-#@@
-wait-online
-#@@
-
 #virustotal
 cd /opt
 DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential qtchooser qt5-default libjansson-dev libcurl4-openssl-dev git zlib1g-dev
@@ -515,9 +515,10 @@ cd /root/.oh-my-zsh/custom/themes/powerlevel10k/gitstatus
 systemctl enable docker && systemctl start docker
 ./build -w -s -d docker
 
-mkdir /opt/opensnitchd
-mkdir /etc/opensnitchd/rules/
-tar xf /opt/rules.tar -C /etc/opensnitchd/rules/
+#OPNESNITCH - uncomment if u want
+#mkdir /opt/opensnitchd
+#mkdir /etc/opensnitchd/rules/
+#tar xf /opt/rules.tar -C /etc/opensnitchd/rules/
 
 #wordlists
 wget -nv --show-progress -O /tmp/w.7z x4k.me/system/wordlist.7z && cd /tmp && 7z x w.7z
@@ -532,15 +533,15 @@ dpkg -i linux-headers-rockchip-mainline_0.9.3_arm64.deb linux-image-rockchip-mai
 
 
 # install opensnitch
-apt-get -y install git libnetfilter-queue-dev libpcap-dev protobuf-compiler python3-pip python3-pyqt5.qtsql python3-pyinotify
-pip install --user unicode_slugify grpcio-tools protobuf
-python3 -m pip install slugify
-cd /opt && dpkg -i opensnitch*
-dpkg --configure -a
-apt-get -y --fix-broken install
-tar xf /opt/rules.tar -C /etc/opensnitchd/rules/
-apt-get -y --fix-broken install
-rm /opt/opensnitch-ui.deb
+#apt-get -y install git libnetfilter-queue-dev libpcap-dev protobuf-compiler python3-pip python3-pyqt5.qtsql python3-pyinotify
+#pip install --user unicode_slugify grpcio-tools protobuf
+#python3 -m pip install slugify
+#cd /opt && dpkg -i opensnitch*
+#dpkg --configure -a
+#apt-get -y --fix-broken install
+#tar xf /opt/rules.tar -C /etc/opensnitchd/rules/
+#apt-get -y --fix-broken install
+#rm /opt/opensnitch-ui.deb
 
 printf "${BLUE_BOLD}"
 read -p "Do you need aircrack-ng rtl88XXau drivers with ready-to-job settings? (y/n) (say yes) " rtl
